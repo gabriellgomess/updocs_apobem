@@ -21,9 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $cliente_cpf = $_POST['cliente_cpf'];
 $tipo_documento = $_POST['tipo_documento'];
-
-// echo json_encode($_POST);
-// exit;
+$vendas_id = $_POST['vendas_id'];
 
 // Verifique se cliente_cpf e tipo_documento estão definidos e não estão vazios
 if (empty($cliente_cpf) || empty($tipo_documento)) {
@@ -46,7 +44,7 @@ try {
 
     if (isset($_FILES['documento-upload'])) {
         $uploaded_file = $_FILES['documento-upload'];
-        upload_file_to_dir($pdo, $uploaded_file, $cliente_cpf, $tipo_documento);
+        upload_file_to_dir($pdo, $vendas_id, $uploaded_file, $cliente_cpf, $tipo_documento);
     } else {
         echo json_encode(['error' => 'Arquivo não enviado']);
     }
@@ -55,7 +53,7 @@ try {
     echo json_encode(['error' => 'Erro na consulta: ' . $e->getMessage()]);
 }
 
-function upload_file_to_dir($pdo, $uploaded_file, $cliente_cpf, $documento_tipo = 0) {
+function upload_file_to_dir($pdo, $vendas_id, $uploaded_file, $cliente_cpf, $documento_tipo = 0) {
     $main_directory = "/var/www/html/updocs/upload/clientes/" . $cliente_cpf . "/";
     $anexo_nome = $uploaded_file["name"];
 
@@ -70,7 +68,7 @@ function upload_file_to_dir($pdo, $uploaded_file, $cliente_cpf, $documento_tipo 
     $anexo_data = date("Y-m-d H:i:s");
     $anexo_caminho = "https://apobem.com.br/updocs/upload/clientes/" . $cliente_cpf . "/" . $anexo_nome;
     $anexo_tipo = $uploaded_file['type'];
-    $anexo_documento = $documento_tipo;
+    $anexo_usuario = 'cliente.final';
 
     if (!file_exists($main_directory)) {
         mkdir($main_directory, 0755, true);
@@ -78,15 +76,16 @@ function upload_file_to_dir($pdo, $uploaded_file, $cliente_cpf, $documento_tipo 
 
     if (move_uploaded_file($uploaded_file['tmp_name'], $file_directory)) {
         try {
-            $sql = "INSERT INTO sys_cliente_anexos (anexo_cpf, anexo_nome, anexo_caminho, anexo_data, anexo_usuario, anexo_tipo, anexo_documento) 
-                    VALUES (:anexo_cpf, :anexo_nome, :anexo_caminho, :anexo_data, 'cliente.final', :anexo_tipo, :anexo_documento)";
+            $sql = "INSERT INTO sys_vendas_anexos_seg (vendas_id, anexo_nome, anexo_caminho, anexo_data, anexo_usuario, anexo_tipo, anexo_documento) 
+                    VALUES (:vendas_id, :anexo_nome, :anexo_caminho, :anexo_data, :anexo_usuario, :anexo_tipo, :anexo_documento)";
             $stmt = $pdo->prepare($sql);
-            $stmt->bindParam(':anexo_cpf', $cliente_cpf, PDO::PARAM_STR);
+            $stmt->bindParam(':vendas_id', $vendas_id, PDO::PARAM_STR);
             $stmt->bindParam(':anexo_nome', $anexo_nome, PDO::PARAM_STR);
             $stmt->bindParam(':anexo_caminho', $anexo_caminho, PDO::PARAM_STR);
             $stmt->bindParam(':anexo_data', $anexo_data, PDO::PARAM_STR);
+            $stmt->bindParam(':anexo_usuario', $anexo_usuario, PDO::PARAM_STR);
             $stmt->bindParam(':anexo_tipo', $anexo_tipo, PDO::PARAM_STR);
-            $stmt->bindParam(':anexo_documento', $anexo_documento, PDO::PARAM_INT);
+            $stmt->bindParam(':anexo_documento', $documento_tipo, PDO::PARAM_INT);
 
             if ($stmt->execute()) {
                 echo json_encode(['success' => 1]);

@@ -1,7 +1,7 @@
 <?php
 
 try {
-    $dsn = 'mysql:host=10.100.0.10;dbname=sistema';
+    $dsn = 'mysql:host=10.100.0.22;dbname=sistema';
     $username = 'root';
     $password = 'Theredpil2001';
     $options = [
