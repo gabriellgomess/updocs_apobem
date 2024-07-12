@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, Typography, Button, Box, CircularProgress, IconButton } from '@mui/material';
+import { Container, Typography, Button, Box, CircularProgress, IconButton, Divider } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -28,18 +28,18 @@ const UploadDocs = () => {
     axios.post('https://apobem.com.br/updocs/updocs_api/consulta_tipos_anexos.php', {
       empregador: employer
     })
-    .then(response => {
-      if (Array.isArray(response.data)) {
-        setDocumentTypes(response.data);
-      } else {
-        console.error('Resposta inesperada da API', response.data);
+      .then(response => {
+        if (Array.isArray(response.data)) {
+          setDocumentTypes(response.data);
+        } else {
+          console.error('Resposta inesperada da API', response.data);
+          setDocumentTypes([]);
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao buscar tipos de documentos:', error);
         setDocumentTypes([]);
-      }
-    })
-    .catch(error => {
-      console.error('Erro ao buscar tipos de documentos:', error);
-      setDocumentTypes([]);
-    });
+      });
   };
 
   const handleFileUpload = async (file, documentType) => {
@@ -101,31 +101,36 @@ const UploadDocs = () => {
   return (
     <>
       <Header />
-      <Container maxWidth="md" sx={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>        
+      <Container maxWidth="md" sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Typography variant="body1" gutterBottom mt={3}>
           {nome && `Olá ${nome.split(' ')[0]}! Faça upload dos seus documentos.`}
         </Typography>
-        <Box display="flex" flexDirection="column" alignItems="center" mt={4} sx={{width: '100vw', maxWidth: '400px'}}>
+        <Box display="flex" flexDirection="column" alignItems="center" mt={4} sx={{ width: '100vw', maxWidth: '400px' }}>
           {documentTypes.map((type) => (
-            <Box key={type.tipo_id} mb={0} textAlign="center" sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%'}}>
-              <img width="50px" src={`https://apobem.com.br/updocs/updocs_api/img/${type.tipo_icone}`} alt="" />
-              <Typography variant="overline">{type.tipo_nome}</Typography>
-              <IconButton
-                component="label"
-                disabled={uploading}
-                color="primary"
-              >
-                {uploadedFiles[type.tipo_id] ? <CheckCircleIcon color="success" /> : <FileUploadIcon />}
-                <input
-                  type="file"
-                  hidden
-                  accept="image/*,video/*"
-                  onChange={(e) => handleFileChange(e, type.tipo_id)}
-                />
-              </IconButton>
-            </Box>
+            <>
+              <Box key={type.tipo_id} mb={0} textAlign="center" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                <img width="50px" src={`https://apobem.com.br/updocs/updocs_api/img/${type.tipo_icone}`} alt="" />
+                <Typography variant="overline">{type.tipo_nome}</Typography>
+                <IconButton
+                  component="label"
+                  disabled={uploading}
+                  color="primary"
+                >
+                  {uploadedFiles[type.tipo_id] ? <CheckCircleIcon color="success" /> : <FileUploadIcon />}
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*,video/*"
+                    onChange={(e) => handleFileChange(e, type.tipo_id)}
+                  />
+                </IconButton>
+              </Box>
+              <Divider sx={{borderColor: '#f5642e52', width: '100%', margin: '3px'}} />
+            </>
+
           ))}
         </Box>
+        
         <Button
           variant="contained"
           color="primary"
