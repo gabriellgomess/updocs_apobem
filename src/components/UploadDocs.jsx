@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Typography, Button, Box, CircularProgress, IconButton, Divider } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Container, Typography, Button, Box, IconButton, Divider } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -48,6 +48,7 @@ const UploadDocs = () => {
     formData.append('cliente_cpf', cpf);
     formData.append('documento-upload', file);
     formData.append('tipo_documento', documentType);
+    formData.append('vendas_id', decodedToken);
 
     try {
       const response = await axios.post('https://apobem.com.br/updocs/updocs_api/salvar.php', formData);
@@ -105,6 +106,7 @@ const UploadDocs = () => {
         <Typography variant="body1" gutterBottom mt={3}>
           {nome && `Olá ${nome.split(' ')[0]}! Faça upload dos seus documentos.`}
         </Typography>
+        <p>ID: {decodedToken}</p>
         <Box display="flex" flexDirection="column" alignItems="center" mt={4} sx={{ width: '100vw', maxWidth: '400px' }}>
           {documentTypes.map((type) => (
             <>
